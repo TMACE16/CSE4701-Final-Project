@@ -13,35 +13,133 @@ DB_PATH = os.path.join(os.path.dirname(__file__), 'petadoption.db')
 SCHEMA = """
 PRAGMA foreign_keys = ON;
 
-CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    role TEXT DEFAULT 'user'
+----------------------------------------------------------------------
+-- CUSTOMERS & BILLING
+----------------------------------------------------------------------
+
+-- Customers: both contract and non-contract
+CREATE TABLE Customer (
+    customer_id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    name             TEXT NOT NULL,
+    email            TEXT,
+    phone            TEXT,
+    address_line1    TEXT,
+    address_line2    TEXT,
+    city             TEXT,
+    state            TEXT,
+    zip              TEXT,
+
+    -- billing method flags
+    has_contract     INTEGER DEFAULT 0,     -- 1 = contract customer
+    account_number   INTEGER UNIQUE,        -- contract customers only
+    credit_card_last4 TEXT                  -- non-contract convenience
 );
 
-CREATE TABLE IF NOT EXISTS pets (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE NOT NULL,
-    species TEXT NOT NULL,
-    breed TEXT,
-    image TEXT,
-    UNIQUE(name, species, breed)
+-- Monthly statements for contract customers
+CREATE TABLE BillingStatement (
+    statement_id     INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_id      INTEGER NOT NULL,
+    statement_month  TEXT NOT NULL,  -- e.g., '2025-01'
+    total_amount     NUMERIC(12,2) DEFAULT 0.00,
+    status           TEXT DEFAULT 'unpaid',
+    
+    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id)
 );
 
-CREATE TABLE IF NOT EXISTS applications (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    pet_id INTEGER NOT NULL,
-    status TEXT NOT NULL DEFAULT 'Pending',
-    submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    pets_owned TEXT,
-    children TEXT,
-    home_type TEXT,
-    outdoor_space TEXT,
-    hours_alone TEXT,
-    FOREIGN KEY(user_id) REFERENCES users(id),
-    FOREIGN KEY(pet_id) REFERENCES pets(id)
+-- Payments (credit card, ACH, etc.)
+CREATE TABLE Payment (
+    payment_id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_id      INTEGER NOT NULL,
+    date_paid        TEXT NOT NULL,
+    amount           REAL NOT NULL,
+    method           TEXT NOT NULL,   -- 'credit_card', 'account', 'prepaid'
+    
+    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id)
+);
+
+----------------------------------------------------------------------
+-- SHIPPING SERVICES & RATES
+----------------------------------------------------------------------
+
+-- Defines service type (envelope, box, overnight, etc.)
+CREATE TABLE ServiceType (
+    service_id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    name             TEXT NOT NULL,       -- e.g., 'Overnight Letter'
+    max_weight_lb    REAL NOT NULL,
+    base_price       REAL NOT NULL,
+    delivery_speed   TEXT NOT NULL        -- 'overnight', '2-day', 'ground'
+);
+
+----------------------------------------------------------------------
+-- PACKAGES
+----------------------------------------------------------------------
+
+CREATE TABLE Package (
+    package_id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_id      INTEGER NOT NULL,       -- sender
+    recipient_name   TEXT NOT NULL,
+    recipient_addr1  TEXT NOT NULL,
+    recipient_addr2  TEXT,
+    recipient_city   TEXT NOT NULL,
+    recipient_state  TEXT NOT NULL,
+    recipient_zip    TEXT NOT NULL,
+
+    service_id       INTEGER NOT NULL,
+    weight_lb        REAL NOT NULL,
+
+    is_hazardous     INTEGER DEFAULT 0,
+    is_international INTEGER DEFAULT 0,
+    declared_value   REAL,                  -- for customs
+    customs_desc     TEXT,                  -- description if international
+
+    payment_type     TEXT NOT NULL,         -- 'account', 'credit_card', 'prepaid'
+    date_shipped     TEXT NOT NULL,
+    date_delivered   TEXT,                  -- NULL until delivered
+    delivered_signature TEXT,               -- who signed
+
+    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id),
+    FOREIGN KEY (service_id) REFERENCES ServiceType(service_id)
+);
+
+----------------------------------------------------------------------
+-- LOCATIONS (Hubs, Trucks, Planes)
+----------------------------------------------------------------------
+
+-- Everything that can hold a package temporarily
+CREATE TABLE Location (
+    location_id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    type             TEXT NOT NULL,    -- 'warehouse', 'truck', 'plane'
+    name             TEXT NOT NULL,
+    city             TEXT,
+    state            TEXT
+);
+
+----------------------------------------------------------------------
+-- PACKAGE TRACKING (event history)
+----------------------------------------------------------------------
+
+CREATE TABLE TrackingEvent (
+    event_id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    package_id       INTEGER NOT NULL,
+    location_id      INTEGER NOT NULL,
+    timestamp        TEXT NOT NULL,
+    status           TEXT NOT NULL, -- e.g., 'arrived', 'departed', 'loaded', 'out for delivery'
+    notes            TEXT,
+
+    FOREIGN KEY (package_id) REFERENCES Package(package_id),
+    FOREIGN KEY (location_id) REFERENCES Location(location_id)
+);
+
+----------------------------------------------------------------------
+-- OPTIONAL: Relationship of package to its monthly billing statement
+----------------------------------------------------------------------
+
+CREATE TABLE StatementPackage (
+    statement_id     INTEGER NOT NULL,
+    package_id       INTEGER NOT NULL,
+    PRIMARY KEY (statement_id, package_id),
+    FOREIGN KEY (statement_id) REFERENCES BillingStatement(statement_id),
+    FOREIGN KEY (package_id) REFERENCES Package(package_id)
 );
 """
 
@@ -66,7 +164,7 @@ def init_db():
         """
         INSERT OR IGNORE INTO users (email, password, role)
         VALUEs (?, ?, "admin")
-        """, ("admin123@gmail.com", "pass")
+        """, ("admin123@gmail.com", "password")
     )
     cursor.executemany(
         """
