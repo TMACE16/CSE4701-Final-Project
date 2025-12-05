@@ -30,7 +30,7 @@ CREATE TABLE Customer (
     zip              TEXT,
 
     -- billing method flags
-    has_contract     INTEGER DEFAULT 0,     -- 1 = contract customer
+    has_contract     INTEGER DEFAULT 0 CHECK (has_contract IN (0, 1)),   -- 1 = contract customer
     account_number   INTEGER UNIQUE,        -- contract customers only
     credit_card_last4 TEXT                  -- non-contract convenience
 );
@@ -40,8 +40,8 @@ CREATE TABLE BillingStatement (
     statement_id     INTEGER PRIMARY KEY AUTOINCREMENT,
     customer_id      INTEGER NOT NULL,
     statement_month  TEXT NOT NULL,  -- e.g., '2025-01'
-    total_amount     NUMERIC(12,2) DEFAULT 0.00,
-    status           TEXT DEFAULT 'unpaid',
+    total_amount     REAL DEFAULT 0.00,
+    status           TEXT DEFAULT 'unpaid' CHECK (status IN ('unpaid', 'paid)),
     
     FOREIGN KEY (customer_id) REFERENCES Customer(customer_id)
 );
@@ -50,11 +50,9 @@ CREATE TABLE BillingStatement (
 CREATE TABLE Payment (
     payment_id       INTEGER PRIMARY KEY AUTOINCREMENT,
     customer_id      INTEGER NOT NULL,
-    date_paid        TEXT NOT NULL,
+    date_paid        DATE NOT NULL,
     amount           REAL NOT NULL,
-    method           TEXT NOT NULL,   -- 'credit_card', 'account', 'prepaid'
-    
-    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id)
+    method           TEXT NOT NULLCHECK (method IN ('account', 'credit_card', 'prepaid')),
 );
 
 ----------------------------------------------------------------------
@@ -67,7 +65,7 @@ CREATE TABLE ServiceType (
     name             TEXT NOT NULL,       -- e.g., 'Overnight Letter'
     max_weight_lb    REAL NOT NULL,
     base_price       REAL NOT NULL,
-    delivery_speed   TEXT NOT NULL        -- 'overnight', '2-day', 'ground'
+    delivery_speed   TEXT NOT NULL CHECK (delivery_speed IN ('overnight', '2-day', 'ground')),
 );
 
 ----------------------------------------------------------------------
@@ -84,6 +82,13 @@ CREATE TABLE Package (
     recipient_state  TEXT NOT NULL,
     recipient_zip    TEXT NOT NULL,
 
+    sender_name      TEXT NOT NULL,
+    sender_add1      TEXT NOT NULL,
+    sender_addr2     TEXT NOT NULL,
+    sender_city      TEXT NOT NULL,
+    sender_state     TEXT NOT NULL,
+    sender_zip       TEXT NOT NULL,
+
     service_id       INTEGER NOT NULL,
     weight_lb        REAL NOT NULL,
 
@@ -92,14 +97,16 @@ CREATE TABLE Package (
     declared_value   REAL,                  -- for customs
     customs_desc     TEXT,                  -- description if international
 
-    payment_type     TEXT NOT NULL,         -- 'account', 'credit_card', 'prepaid'
-    date_shipped     TEXT NOT NULL,
-    date_delivered   TEXT,                  -- NULL until delivered
+    payment_type     TEXT NOT NULL CHECK (payment_type IN ('account', 'credit_card', 'prepaid')),
+    date_shipped     DATE NOT NULL,
+    date_delivered   DATE,                  -- NULL until delivered
     delivered_signature TEXT,               -- who signed
 
     FOREIGN KEY (customer_id) REFERENCES Customer(customer_id),
     FOREIGN KEY (service_id) REFERENCES ServiceType(service_id)
 );
+
+ALTER TABLE Payment ADD COLUMN package_id INTEGER REFERENCES Package(package_id);
 
 ----------------------------------------------------------------------
 -- LOCATIONS (Hubs, Trucks, Planes)
@@ -108,7 +115,7 @@ CREATE TABLE Package (
 -- Everything that can hold a package temporarily
 CREATE TABLE Location (
     location_id      INTEGER PRIMARY KEY AUTOINCREMENT,
-    type             TEXT NOT NULL,    -- 'warehouse', 'truck', 'plane'
+    type             TEXT CHECK (type IN ('warehouse', 'truck', 'plane')),
     name             TEXT NOT NULL,
     city             TEXT,
     state            TEXT
@@ -122,8 +129,8 @@ CREATE TABLE TrackingEvent (
     event_id         INTEGER PRIMARY KEY AUTOINCREMENT,
     package_id       INTEGER NOT NULL,
     location_id      INTEGER NOT NULL,
-    timestamp        TEXT NOT NULL,
-    status           TEXT NOT NULL, -- e.g., 'arrived', 'departed', 'loaded', 'out for delivery'
+    timestamp        TIMESTAMP NOT NULL,
+    status           TEXT CHECK (status IN ('arrived', 'departed', , -- e.g., 'arrived', 'departed', 'loaded', 'out for delivery'
     notes            TEXT,
 
     FOREIGN KEY (package_id) REFERENCES Package(package_id),
