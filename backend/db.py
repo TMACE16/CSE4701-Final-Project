@@ -75,19 +75,19 @@ CREATE TABLE ServiceType (
 CREATE TABLE Package (
     package_id       INTEGER PRIMARY KEY AUTOINCREMENT,
     customer_id      INTEGER NOT NULL,       -- sender
+    sender_name      TEXT NOT NULL,
+    sender_add1      TEXT NOT NULL,
+    sender_addr2     TEXT,
+    sender_city      TEXT NOT NULL,
+    sender_state     TEXT NOT NULL,
+    sender_zip       TEXT NOT NULL,
+
     recipient_name   TEXT NOT NULL,
     recipient_addr1  TEXT NOT NULL,
     recipient_addr2  TEXT,
     recipient_city   TEXT NOT NULL,
     recipient_state  TEXT NOT NULL,
     recipient_zip    TEXT NOT NULL,
-
-    sender_name      TEXT NOT NULL,
-    sender_add1      TEXT NOT NULL,
-    sender_addr2     TEXT NOT NULL,
-    sender_city      TEXT NOT NULL,
-    sender_state     TEXT NOT NULL,
-    sender_zip       TEXT NOT NULL,
 
     service_id       INTEGER NOT NULL,
     weight_lb        REAL NOT NULL,
