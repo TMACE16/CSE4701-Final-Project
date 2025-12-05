@@ -1,0 +1,29 @@
+.add-pet-page {
+  padding: 40px;
+  text-align: center;
+}
+
+.add-pet-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 400px;
+  margin: auto;
+}
+
+.add-pet-form input,
+.add-pet-form button {
+  padding: 10px;
+  font-size: 1rem;
+}
+
+.add-pet-form button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.add-pet-form button:hover {
+  background-color: #0056b3;
+}

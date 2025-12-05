@@ -1,0 +1,6 @@
+# Ignore SQLite database file
+petadoption.db
+
+# Python cache
+__pycache__/
+*.pyc
