@@ -22,6 +22,7 @@ CREATE TABLE Customer (
     customer_id      INTEGER PRIMARY KEY AUTOINCREMENT,
     name             TEXT NOT NULL,
     email            TEXT,
+    password         TEXT,
     phone            TEXT,
     address_line1    TEXT,
     address_line2    TEXT,
@@ -33,6 +34,9 @@ CREATE TABLE Customer (
     has_contract     INTEGER DEFAULT 0 CHECK (has_contract IN (0, 1)),   -- 1 = contract customer
     account_number   INTEGER UNIQUE,        -- contract customers only
     credit_card_last4 TEXT                  -- non-contract convenience
+
+    CHECK ((email IS NULL AND password IS NULL) OR 
+           (email IS NOT NULL AND password IS NOT NULL))
 );
 
 -- Monthly statements for contract customers
