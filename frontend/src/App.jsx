@@ -1,15 +1,15 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import NavBar from './components/NavBar';
 import Home from './screens/Home';
-import PetList from './screens/PetList';
-import AddPet from './screens/AddPet';
-import Questionnaire from "./screens/Questionnaire";
+import PackageTracking from './screens/PackageTracking';
+import ShipPackage from './screens/ShipPackage';
+import BillingPage from './screens/BillingPage';
+import AdminDashboard from './screens/AdminDashboard';
 import Register from './screens/Register';
 import Login from './screens/Login';
-import AdminRegister from './screens/AdminRegister';
-import AdminQuestionnaires from './screens/AdminQuestionnaires';
-import MyApplications from './screens/MyApplications';
+import AdminUserManagement from './screens/AdminUserManagement';
+
 
 export default function App() {
   return (
@@ -17,14 +17,13 @@ export default function App() {
       <NavBar />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/pets" element={<PetList />} />
-        <Route path="/add-pet" element={<AddPet />} />
-        <Route path="/questionnaire" element={<Questionnaire />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-	<Route path="/admin-register" element={<AdminRegister />} />
-	<Route path="/admin-questionnaires" element={<AdminQuestionnaires />} />
-        <Route path="/my-applications" element={<MyApplications />} />
+	<Route path="/admin-management" element={<AdminUserManagement />} />
+	<Route path="/admin" element={<AdminDashboard />} />
+		<Route path="/track" element={<PackageTracking />} />
+        <Route path="/ship" element={<ShipPackage />} />
+        <Route path="/billing" element={<BillingPage />} />
       </Routes>
     </>
   );

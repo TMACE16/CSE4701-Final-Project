@@ -7,23 +7,23 @@ import os
 import sqlite3
 
 # Path to SQLite database file
-DB_PATH = os.path.join(os.path.dirname(__file__), 'petadoption.db')
+DB_PATH = os.path.join(os.path.dirname(__file__), 'shipping.db')
 
 # SQL schema to create tables
 SCHEMA = """
 PRAGMA foreign_keys = ON;
 
 ----------------------------------------------------------------------
-Users on the website/app
+-- Users on the website/app
 ----------------------------------------------------------------------
 
-CREATE TABLE User (
+CREATE TABLE IF NOT EXISTS User (
     user_id          INTEGER PRIMARY KEY AUTOINCREMENT,
     email            TEXT UNIQUE NOT NULL,
     password         TEXT NOT NULL,
     role             TEXT NOT NULL CHECK (role IN ('customer', 'staff', 'admin')),
     
-    CHECK (email LIKE '%@%')  -- basic email validation
+    CHECK (email LIKE '%@%')
 );
 
 ----------------------------------------------------------------------
@@ -31,12 +31,10 @@ CREATE TABLE User (
 ----------------------------------------------------------------------
 
 -- Customers: both contract and non-contract
-CREATE TABLE Customer (
+CREATE TABLE IF NOT EXISTS Customer (
     customer_id      INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id          INTEGER UNIQUE,
     name             TEXT NOT NULL,
-    email            TEXT,
-    password         TEXT,
     phone            TEXT,
     address_line1    TEXT,
     address_line2    TEXT,
@@ -45,35 +43,35 @@ CREATE TABLE Customer (
     zip              TEXT,
 
     -- billing method flags
-    has_contract     INTEGER DEFAULT 0 CHECK (has_contract IN (0, 1)),   -- 1 = contract customer
-    account_number   INTEGER UNIQUE,        -- contract customers only
-    credit_card_last4 TEXT                  -- non-contract convenience
-
-    CHECK (((email IS NULL AND password IS NULL) OR 
-           (email IS NOT NULL AND password IS NOT NULL)) AND
-           (email LIKE '%@%')),
+    has_contract     INTEGER DEFAULT 0 CHECK (has_contract IN (0, 1)),
+    account_number   INTEGER UNIQUE,
+    credit_card_last4 TEXT,
 
     FOREIGN KEY (user_id) REFERENCES User(user_id)
 );
 
 -- Monthly statements for contract customers
-CREATE TABLE BillingStatement (
+CREATE TABLE IF NOT EXISTS BillingStatement (
     statement_id     INTEGER PRIMARY KEY AUTOINCREMENT,
     customer_id      INTEGER NOT NULL,
-    statement_month  TEXT NOT NULL,  -- e.g., '2025-01'
+    statement_month  TEXT NOT NULL,
     total_amount     REAL DEFAULT 0.00,
-    status           TEXT DEFAULT 'unpaid' CHECK (status IN ('unpaid', 'paid)),
+    status           TEXT DEFAULT 'unpaid' CHECK (status IN ('unpaid', 'paid')),
     
     FOREIGN KEY (customer_id) REFERENCES Customer(customer_id)
 );
 
 -- Payments (credit card, ACH, etc.)
-CREATE TABLE Payment (
+CREATE TABLE IF NOT EXISTS Payment (
     payment_id       INTEGER PRIMARY KEY AUTOINCREMENT,
     customer_id      INTEGER NOT NULL,
-    date_paid        DATE NOT NULL,
+    package_id       INTEGER,
+    date_paid        TEXT NOT NULL,
     amount           REAL NOT NULL,
-    method           TEXT NOT NULLCHECK (method IN ('account', 'credit_card', 'prepaid')),
+    method           TEXT NOT NULL CHECK (method IN ('account', 'credit_card', 'prepaid')),
+    
+    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id),
+    FOREIGN KEY (package_id) REFERENCES Package(package_id)
 );
 
 ----------------------------------------------------------------------
@@ -81,23 +79,24 @@ CREATE TABLE Payment (
 ----------------------------------------------------------------------
 
 -- Defines service type (envelope, box, overnight, etc.)
-CREATE TABLE ServiceType (
+CREATE TABLE IF NOT EXISTS ServiceType (
     service_id       INTEGER PRIMARY KEY AUTOINCREMENT,
-    name             TEXT NOT NULL,       -- e.g., 'Overnight Letter'
+    name             TEXT NOT NULL,
     max_weight_lb    REAL NOT NULL,
     base_price       REAL NOT NULL,
-    delivery_speed   TEXT NOT NULL CHECK (delivery_speed IN ('overnight', '2-day', 'ground')),
+    delivery_speed   TEXT NOT NULL CHECK (delivery_speed IN ('overnight', '2-day', 'ground'))
 );
 
 ----------------------------------------------------------------------
 -- PACKAGES
 ----------------------------------------------------------------------
 
-CREATE TABLE Package (
+CREATE TABLE IF NOT EXISTS Package (
     package_id       INTEGER PRIMARY KEY AUTOINCREMENT,
-    customer_id      INTEGER NOT NULL,       -- sender
+    customer_id      INTEGER NOT NULL,
+    
     sender_name      TEXT NOT NULL,
-    sender_add1      TEXT NOT NULL,
+    sender_addr1     TEXT NOT NULL,
     sender_addr2     TEXT,
     sender_city      TEXT NOT NULL,
     sender_state     TEXT NOT NULL,
@@ -113,30 +112,28 @@ CREATE TABLE Package (
     service_id       INTEGER NOT NULL,
     weight_lb        REAL NOT NULL,
 
-    is_hazardous     INTEGER DEFAULT 0,
-    is_international INTEGER DEFAULT 0,
-    declared_value   REAL,                  -- for customs
-    customs_desc     TEXT,                  -- description if international
+    is_hazardous     INTEGER DEFAULT 0 CHECK (is_hazardous IN (0, 1)),
+    is_international INTEGER DEFAULT 0 CHECK (is_international IN (0, 1)),
+    declared_value   REAL,
+    customs_desc     TEXT,
 
     payment_type     TEXT NOT NULL CHECK (payment_type IN ('account', 'credit_card', 'prepaid')),
-    date_shipped     DATE NOT NULL,
-    date_delivered   DATE,                  -- NULL until delivered
-    delivered_signature TEXT,               -- who signed
+    date_shipped     TEXT NOT NULL,
+    date_delivered   TEXT,
+    delivered_signature TEXT,
 
     FOREIGN KEY (customer_id) REFERENCES Customer(customer_id),
     FOREIGN KEY (service_id) REFERENCES ServiceType(service_id)
 );
-
-ALTER TABLE Payment ADD COLUMN package_id INTEGER REFERENCES Package(package_id);
 
 ----------------------------------------------------------------------
 -- LOCATIONS (Hubs, Trucks, Planes)
 ----------------------------------------------------------------------
 
 -- Everything that can hold a package temporarily
-CREATE TABLE Location (
+CREATE TABLE IF NOT EXISTS Location (
     location_id      INTEGER PRIMARY KEY AUTOINCREMENT,
-    type             TEXT CHECK (type IN ('warehouse', 'truck', 'plane')),
+    type             TEXT NOT NULL CHECK (type IN ('warehouse', 'truck', 'plane')),
     name             TEXT NOT NULL,
     city             TEXT,
     state            TEXT
@@ -146,12 +143,12 @@ CREATE TABLE Location (
 -- PACKAGE TRACKING (event history)
 ----------------------------------------------------------------------
 
-CREATE TABLE TrackingEvent (
+CREATE TABLE IF NOT EXISTS TrackingEvent (
     event_id         INTEGER PRIMARY KEY AUTOINCREMENT,
     package_id       INTEGER NOT NULL,
     location_id      INTEGER NOT NULL,
-    timestamp        TIMESTAMP NOT NULL,
-    status           TEXT CHECK (status IN ('arrived', 'departed', , -- e.g., 'arrived', 'departed', 'loaded', 'out for delivery'
+    timestamp        TEXT NOT NULL,
+    status           TEXT NOT NULL CHECK (status IN ('arrived', 'departed', 'loaded', 'out for delivery', 'delivered', 'processing')),
     notes            TEXT,
 
     FOREIGN KEY (package_id) REFERENCES Package(package_id),
@@ -159,10 +156,10 @@ CREATE TABLE TrackingEvent (
 );
 
 ----------------------------------------------------------------------
-Relationship of package to its monthly billing statement
+-- Relationship of package to its monthly billing statement
 ----------------------------------------------------------------------
 
-CREATE TABLE StatementPackage (
+CREATE TABLE IF NOT EXISTS StatementPackage (
     statement_id     INTEGER NOT NULL,
     package_id       INTEGER NOT NULL,
     PRIMARY KEY (statement_id, package_id),
@@ -171,16 +168,17 @@ CREATE TABLE StatementPackage (
 );
 
 ----------------------------------------------------------------------
-Staff
+-- Staff
 ----------------------------------------------------------------------
 
-CREATE TABLE Staff (
+CREATE TABLE IF NOT EXISTS Staff (
     staff_id         INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id          INTEGER UNIQUE NOT NULL,
-    role             TEXT CHECK (role IN ('staff', 'admin))
+    employee_number  TEXT UNIQUE NOT NULL,
+    hire_date        TEXT NOT NULL,
+    department       TEXT,
     
     FOREIGN KEY (user_id) REFERENCES User(user_id)
-    FOREIGN KEY (role) REFERENCES User(role)
 );
 """
 
@@ -194,29 +192,70 @@ def get_db_connection():
 
 
 def init_db():
-    # Only initialize if DB file does not exist
     """
-    Initialize the database by creating tables if the DB file doesn't already exist.
+    Initialize the database by creating tables and adding sample data.
     """
     conn = get_db_connection()
     conn.executescript(SCHEMA)
     cursor = conn.cursor()
+    
+    # Create admin user
     cursor.execute(
         """
-        INSERT OR IGNORE INTO users (email, password, role)
-        VALUEs (?, ?, "admin")
-        """, ("admin123@gmail.com", "password")
+        INSERT OR IGNORE INTO User (email, password, role)
+        VALUES (?, ?, ?)
+        """, ("admin@shipping.com", "admin123", "admin")
     )
+    
+    # Create sample staff user
+    cursor.execute(
+        """
+        INSERT OR IGNORE INTO User (email, password, role)
+        VALUES (?, ?, ?)
+        """, ("staff@shipping.com", "staff123", "staff")
+    )
+    
+    # Create sample customer user
+    cursor.execute(
+        """
+        INSERT OR IGNORE INTO User (email, password, role)
+        VALUES (?, ?, ?)
+        """, ("customer@example.com", "password123", "customer")
+    )
+    
+    # Create sample service types
     cursor.executemany(
         """
-        INSERT OR IGNORE INTO pets (name, species, breed, image)
+        INSERT OR IGNORE INTO ServiceType (name, max_weight_lb, base_price, delivery_speed)
         VALUES (?, ?, ?, ?)
-
         """,
         [
-            ('Ted', 'Dog', 'Husky', 'ted.jpg'),
-            ('George', 'Cat', 'Domestic Short Hair', 'george.jpg')
+            ('Overnight Letter', 1.0, 25.99, 'overnight'),
+            ('Overnight Package', 50.0, 45.99, 'overnight'),
+            ('2-Day Express', 70.0, 19.99, '2-day'),
+            ('Ground Shipping', 150.0, 9.99, 'ground')
         ]
     )
+    
+    # Create sample locations
+    cursor.executemany(
+        """
+        INSERT OR IGNORE INTO Location (type, name, city, state)
+        VALUES (?, ?, ?, ?)
+        """,
+        [
+            ('warehouse', 'Distribution Center East', 'Newark', 'NJ'),
+            ('warehouse', 'Distribution Center West', 'Los Angeles', 'CA'),
+            ('truck', 'Delivery Truck 101', 'New York', 'NY'),
+            ('plane', 'Cargo Flight 202', None, None)
+        ]
+    )
+    
     conn.commit()
     conn.close()
+    print("Database initialized successfully!")
+
+
+if __name__ == '__main__':
+    # Run this file directly to initialize the database
+    init_db()

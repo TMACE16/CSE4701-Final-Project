@@ -53,6 +53,7 @@ export default function NavBar() {
           </div>
         ) : (
           <>
+			<Link t0="/tracking" className="nav-button">Tracking</Link>
             <Link to="/login" className="nav-button">Sign In</Link>
             <Link to="/register" className="nav-button">Register</Link>
           </>
