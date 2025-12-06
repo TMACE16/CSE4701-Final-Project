@@ -35,16 +35,10 @@ def home():
           properties:
             message:
               type: string
-              example: Pet Adoption API is running.
+              example: Package Delivery API is running.
     """
-    return jsonify({"message": "Pet Adoption API is running."})
+    return jsonify({"message": "Package Delivery API is running."})
 
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    """
-    Uploads the image file for the given pet.
-    """
-    return send_from_directory('uploads', filename)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
