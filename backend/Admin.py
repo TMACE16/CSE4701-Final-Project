@@ -401,3 +401,301 @@ def get_package_location(package_id):
         return jsonify({'error': str(e)}), 500
     finally:
         conn.close()
+
+
+# Add this decorator for admin-only access
+def admin_required(f):
+    """
+    Decorator to require admin role only.
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            return jsonify({'error': 'Authentication required'}), 401
+        
+        try:
+            token = auth_header.split(' ')[1]
+            user_id = int(token)
+            
+            # Check if user is admin
+            conn = get_db_connection()
+            user = conn.execute(
+                "SELECT role FROM User WHERE user_id = ?",
+                (user_id,)
+            ).fetchone()
+            conn.close()
+            
+            if not user or user['role'] != 'admin':
+                return jsonify({'error': 'Admin access required'}), 403
+            
+            request.user_id = user_id
+            request.user_role = user['role']
+        except (IndexError, ValueError):
+            return jsonify({'error': 'Invalid token'}), 401
+            
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+@admin_routes.route('/admin/users', methods=['GET'])
+@admin_required
+def get_all_users():
+    """
+    Get all staff and admin users.
+    ---
+    responses:
+      200:
+        description: List of users
+    """
+    conn = get_db_connection()
+    
+    try:
+        users = conn.execute("""
+            SELECT user_id, email, role
+            FROM User
+            WHERE role IN ('staff', 'admin')
+            ORDER BY role, email
+        """).fetchall()
+        
+        return jsonify({
+            'users': [
+                {
+                    'user_id': u['user_id'],
+                    'email': u['email'],
+                    'role': u['role']
+                }
+                for u in users
+            ]
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+
+@admin_routes.route('/admin/users/create', methods=['POST'])
+@admin_required
+def create_staff_user():
+    """
+    Create a new staff or admin user.
+    ---
+    parameters:
+      - in: body
+        name: user
+        required: true
+        schema:
+          type: object
+          required:
+            - email
+            - password
+            - role
+          properties:
+            email:
+              type: string
+            password:
+              type: string
+            role:
+              type: string
+              enum: [staff, admin]
+            employee_number:
+              type: string
+            department:
+              type: string
+    responses:
+      201:
+        description: User created successfully
+      400:
+        description: Invalid input or email already exists
+    """
+    data = request.get_json()
+    conn = get_db_connection()
+    
+    try:
+        # Validate role
+        if data['role'] not in ['staff', 'admin']:
+            return jsonify({'error': 'Role must be staff or admin'}), 400
+        
+        # Check if email already exists
+        existing = conn.execute(
+            "SELECT user_id FROM User WHERE email = ?",
+            (data['email'],)
+        ).fetchone()
+        
+        if existing:
+            return jsonify({'error': 'Email already exists'}), 400
+        
+        cursor = conn.cursor()
+        
+        # Create user account
+        cursor.execute("""
+            INSERT INTO User (email, password, role)
+            VALUES (?, ?, ?)
+        """, (
+            data['email'],
+            data['password'],  # In production, hash this!
+            data['role']
+        ))
+        
+        user_id = cursor.lastrowid
+        
+        # Create staff record if provided
+        if 'employee_number' in data or 'department' in data:
+            cursor.execute("""
+                INSERT INTO Staff (user_id, employee_number, hire_date, department)
+                VALUES (?, ?, ?, ?)
+            """, (
+                user_id,
+                data.get('employee_number', f'EMP{user_id:05d}'),
+                datetime.now().strftime('%Y-%m-%d'),
+                data.get('department', 'General')
+            ))
+        
+        conn.commit()
+        
+        return jsonify({
+            'message': f'{data["role"].capitalize()} user created successfully',
+            'user_id': user_id,
+            'email': data['email'],
+            'role': data['role']
+        }), 201
+        
+    except sqlite3.IntegrityError as e:
+        conn.rollback()
+        return jsonify({'error': 'Database integrity error', 'details': str(e)}), 400
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+
+@admin_routes.route('/admin/users/<int:user_id>', methods=['DELETE'])
+@admin_required
+def delete_user(user_id):
+    """
+    Delete a staff or admin user (cannot delete yourself).
+    ---
+    parameters:
+      - in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+    responses:
+      200:
+        description: User deleted successfully
+      400:
+        description: Cannot delete yourself
+      403:
+        description: Cannot delete customer accounts
+      404:
+        description: User not found
+    """
+    conn = get_db_connection()
+    
+    try:
+        # Prevent self-deletion
+        if user_id == request.user_id:
+            return jsonify({'error': 'Cannot delete your own account'}), 400
+        
+        # Check user exists and is staff/admin
+        user = conn.execute(
+            "SELECT role FROM User WHERE user_id = ?",
+            (user_id,)
+        ).fetchone()
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        if user['role'] == 'customer':
+            return jsonify({'error': 'Cannot delete customer accounts from this interface'}), 403
+        
+        cursor = conn.cursor()
+        
+        # Delete staff record if exists
+        cursor.execute("DELETE FROM Staff WHERE user_id = ?", (user_id,))
+        
+        # Delete user
+        cursor.execute("DELETE FROM User WHERE user_id = ?", (user_id,))
+        
+        conn.commit()
+        
+        return jsonify({
+            'message': 'User deleted successfully',
+            'user_id': user_id
+        }), 200
+        
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+
+@admin_routes.route('/admin/users/<int:user_id>/update-role', methods=['PUT'])
+@admin_required
+def update_user_role(user_id):
+    """
+    Update a user's role (staff <-> admin).
+    ---
+    parameters:
+      - in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      - in: body
+        name: role
+        required: true
+        schema:
+          type: object
+          required:
+            - role
+          properties:
+            role:
+              type: string
+              enum: [staff, admin]
+    responses:
+      200:
+        description: Role updated successfully
+      400:
+        description: Invalid role or cannot modify yourself
+    """
+    data = request.get_json()
+    conn = get_db_connection()
+    
+    try:
+        # Prevent self-modification
+        if user_id == request.user_id:
+            return jsonify({'error': 'Cannot modify your own role'}), 400
+        
+        # Validate role
+        if data['role'] not in ['staff', 'admin']:
+            return jsonify({'error': 'Role must be staff or admin'}), 400
+        
+        # Update role
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE User
+            SET role = ?
+            WHERE user_id = ? AND role IN ('staff', 'admin')
+        """, (data['role'], user_id))
+        
+        if cursor.rowcount == 0:
+            return jsonify({'error': 'User not found or not a staff/admin'}), 404
+        
+        conn.commit()
+        
+        return jsonify({
+            'message': 'Role updated successfully',
+            'user_id': user_id,
+            'new_role': data['role']
+        }), 200
+        
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
