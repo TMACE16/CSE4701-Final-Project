@@ -14,12 +14,26 @@ SCHEMA = """
 PRAGMA foreign_keys = ON;
 
 ----------------------------------------------------------------------
+Users on the website/app
+----------------------------------------------------------------------
+
+CREATE TABLE User (
+    user_id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    email            TEXT UNIQUE NOT NULL,
+    password         TEXT NOT NULL,
+    role             TEXT NOT NULL CHECK (role IN ('customer', 'staff', 'admin')),
+    
+    CHECK (email LIKE '%@%')  -- basic email validation
+);
+
+----------------------------------------------------------------------
 -- CUSTOMERS & BILLING
 ----------------------------------------------------------------------
 
 -- Customers: both contract and non-contract
 CREATE TABLE Customer (
     customer_id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id          INTEGER UNIQUE,
     name             TEXT NOT NULL,
     email            TEXT,
     password         TEXT,
@@ -35,8 +49,11 @@ CREATE TABLE Customer (
     account_number   INTEGER UNIQUE,        -- contract customers only
     credit_card_last4 TEXT                  -- non-contract convenience
 
-    CHECK ((email IS NULL AND password IS NULL) OR 
-           (email IS NOT NULL AND password IS NOT NULL))
+    CHECK (((email IS NULL AND password IS NULL) OR 
+           (email IS NOT NULL AND password IS NOT NULL)) AND
+           (email LIKE '%@%')),
+
+    FOREIGN KEY (user_id) REFERENCES User(user_id)
 );
 
 -- Monthly statements for contract customers
@@ -142,7 +159,7 @@ CREATE TABLE TrackingEvent (
 );
 
 ----------------------------------------------------------------------
--- OPTIONAL: Relationship of package to its monthly billing statement
+Relationship of package to its monthly billing statement
 ----------------------------------------------------------------------
 
 CREATE TABLE StatementPackage (
@@ -151,6 +168,19 @@ CREATE TABLE StatementPackage (
     PRIMARY KEY (statement_id, package_id),
     FOREIGN KEY (statement_id) REFERENCES BillingStatement(statement_id),
     FOREIGN KEY (package_id) REFERENCES Package(package_id)
+);
+
+----------------------------------------------------------------------
+Staff
+----------------------------------------------------------------------
+
+CREATE TABLE Staff (
+    staff_id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id          INTEGER UNIQUE NOT NULL,
+    role             TEXT CHECK (role IN ('staff', 'admin))
+    
+    FOREIGN KEY (user_id) REFERENCES User(user_id)
+    FOREIGN KEY (role) REFERENCES User(role)
 );
 """
 
