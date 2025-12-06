@@ -8,7 +8,7 @@ import BillingPage from './screens/BillingPage';
 import AdminDashboard from './screens/AdminDashboard';
 import Register from './screens/Register';
 import Login from './screens/Login';
-import AdminRegister from './screens/AdminRegister';
+import AdminUserManagement from './screens/AdminUserManagement';
 
 
 export default function App() {
@@ -19,7 +19,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-	<Route path="/admin-register" element={<AdminRegister />} />
+	<Route path="/admin-management" element={<AdminUserManagement />} />
 	<Route path="/admin" element={<AdminDashboard />} />
 		<Route path="/track" element={<PackageTracking />} />
         <Route path="/ship" element={<ShipPackage />} />
