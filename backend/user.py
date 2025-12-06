@@ -62,7 +62,7 @@ def login():
 
     conn = get_db_connection()
     user = conn.execute(
-        "SELECT * FROM users WHERE email = ? AND password = ?",
+        "SELECT * FROM User WHERE email = ? AND password = ?",
         (email, password)
     ).fetchone()
     conn.close()
@@ -112,7 +112,7 @@ def register():
     cursor = conn.cursor()
     try:
         cursor.execute(
-          "INSERT INTO users (email, password, role) VALUES (?, ?, ?)",
+          "INSERT INTO User (email, password, role) VALUES (?, ?, ?)",
           (email, password, role)
         )
         conn.commit()
