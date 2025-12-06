@@ -7,21 +7,22 @@ from flask import Flask, jsonify, send_from_directory
 from flasgger import Swagger
 from flask_cors import CORS
 from user import user_routes
-from pets import pet_routes
-from questionnaire import questionnaire_routes
-import db  # your database initializer
+from tracking import tracking_routes
+from package import package_routes
+from billing import billing_routes
+from admin import admin_routes
+import db
 
 app = Flask(__name__)
-Swagger(app)  # enables /apidocs
-
-# Initialize the SQLite database (creates file and tables on first run)
-db.init_db()
-# Register blueprints
-app.register_blueprint(user_routes, url_prefix='/users')
-app.register_blueprint(pet_routes, url_prefix='/pets')
-app.register_blueprint(questionnaire_routes, url_prefix='/api')
-
 CORS(app, supports_credentials=True)
+
+# Register all blueprints
+app.register_blueprint(user_routes, url_prefix='/api')
+app.register_blueprint(tracking_routes, url_prefix='/api')
+app.register_blueprint(package_routes, url_prefix='/api')
+app.register_blueprint(billing_routes, url_prefix='/api')
+app.register_blueprint(admin_routes, url_prefix='/api')
+
 
 @app.route('/')
 def home():
@@ -41,4 +42,4 @@ def home():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
