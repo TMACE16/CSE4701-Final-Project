@@ -42,6 +42,39 @@ def staff_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def admin_required(f):
+    """
+    Decorator to require admin role only.
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            return jsonify({'error': 'Authentication required'}), 401
+        
+        try:
+            token = auth_header.split(' ')[1]
+            user_id = int(token)
+            
+            # Check if user is admin
+            conn = get_db_connection()
+            user = conn.execute(
+                "SELECT role FROM User WHERE user_id = ?",
+                (user_id,)
+            ).fetchone()
+            conn.close()
+            
+            if not user or user['role'] != 'admin':
+                return jsonify({'error': 'Admin access required'}), 403
+            
+            request.user_id = user_id
+            request.user_role = user['role']
+        except (IndexError, ValueError):
+            return jsonify({'error': 'Invalid token'}), 401
+            
+        return f(*args, **kwargs)
+    return decorated_function
+
 
 @admin_routes.route('/admin/packages', methods=['GET'])
 @staff_required
@@ -401,41 +434,6 @@ def get_package_location(package_id):
         return jsonify({'error': str(e)}), 500
     finally:
         conn.close()
-
-
-# Add this decorator for admin-only access
-def admin_required(f):
-    """
-    Decorator to require admin role only.
-    """
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        auth_header = request.headers.get('Authorization')
-        if not auth_header:
-            return jsonify({'error': 'Authentication required'}), 401
-        
-        try:
-            token = auth_header.split(' ')[1]
-            user_id = int(token)
-            
-            # Check if user is admin
-            conn = get_db_connection()
-            user = conn.execute(
-                "SELECT role FROM User WHERE user_id = ?",
-                (user_id,)
-            ).fetchone()
-            conn.close()
-            
-            if not user or user['role'] != 'admin':
-                return jsonify({'error': 'Admin access required'}), 403
-            
-            request.user_id = user_id
-            request.user_role = user['role']
-        except (IndexError, ValueError):
-            return jsonify({'error': 'Invalid token'}), 401
-            
-        return f(*args, **kwargs)
-    return decorated_function
 
 
 @admin_routes.route('/admin/users', methods=['GET'])
