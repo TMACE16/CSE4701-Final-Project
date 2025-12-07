@@ -19,7 +19,7 @@ const BillingPage = () => {
   const fetchStatements = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('http://localhost:5000/api/billing/statements', {
+      const response = await fetch('http://localhost:8000/api/billing/statements', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -41,7 +41,7 @@ const BillingPage = () => {
   const fetchPaymentHistory = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('http://localhost:5000/api/billing/payment-history', {
+      const response = await fetch('http://localhost:8000/api/billing/payment-history', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -57,7 +57,7 @@ const BillingPage = () => {
   const fetchStatementDetails = async (statementId) => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:5000/api/billing/statements/${statementId}`, {
+      const response = await fetch(`http://localhost:8000/api/billing/statements/${statementId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
