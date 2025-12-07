@@ -24,7 +24,7 @@ const AdminDashboard = () => {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('http://localhost:5000/api/admin/stats', {
+      const response = await fetch('http://localhost:8000/api/admin/stats', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -40,7 +40,7 @@ const AdminDashboard = () => {
   const fetchPackages = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('http://localhost:5000/api/admin/packages', {
+      const response = await fetch('http://localhost:8000/api/admin/packages', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -58,7 +58,7 @@ const AdminDashboard = () => {
   const fetchLocations = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('http://localhost:5000/api/admin/locations', {
+      const response = await fetch('http://localhost:8000/api/admin/locations', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -77,7 +77,7 @@ const AdminDashboard = () => {
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch(
-        `http://localhost:5000/api/admin/packages/${selectedPackage}/update-status`,
+        `http://localhost:8000/api/admin/packages/${selectedPackage}/update-status`,
         {
           method: 'POST',
           headers: {
