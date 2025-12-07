@@ -255,6 +255,53 @@ def init_db():
     conn.close()
     print("Database initialized successfully!")
 
+    # First, get the user_id
+    user_result = cursor.execute("""
+        SELECT user_id FROM User WHERE email = ?
+    """, ("customer@example.com",)).fetchone()
+
+    if user_result:
+        user_id = user_result['user_id']
+    
+        # Create customer profile
+        cursor.execute("""
+            INSERT OR IGNORE INTO Customer (user_id, name, phone, address_line1, city, state, zip, has_contract, account_number)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (user_id, "John Customer", "555-1234", "123 Main St", "New York", "NY", "10001", 0, None))
+
+
+    # Add a test package
+    cursor.execute("""
+        INSERT OR IGNORE INTO Package (
+            customer_id, sender_name, sender_addr1, sender_city, sender_state, sender_zip,
+            recipient_name, recipient_addr1, recipient_city, recipient_state, recipient_zip,
+            service_id, weight_lb, is_hazardous, is_international, payment_type, date_shipped
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        1,  # customer_id (adjust as needed)
+        "John Sender", "123 Main St", "New York", "NY", "10001",
+        "Jane Recipient", "456 Oak Ave", "Los Angeles", "CA", "90001",
+        1,  # service_id (overnight)
+        5.5,  # weight
+        0,  # not hazardous
+        0,  # not international
+        "credit_card",
+        "2025-12-01 10:00:00"
+    ))
+
+    package_id = cursor.lastrowid
+
+    # Add tracking event for the package
+    cursor.execute("""
+        INSERT INTO TrackingEvent (package_id, location_id, timestamp, status, notes)
+        VALUES (?, ?, ?, ?, ?)
+    """, (
+        package_id,
+        1,  # location_id (warehouse)
+        "2025-12-01 10:30:00",
+        "processing",
+        "Package received at distribution center"
+    ))
 
 if __name__ == '__main__':
     # Run this file directly to initialize the database
