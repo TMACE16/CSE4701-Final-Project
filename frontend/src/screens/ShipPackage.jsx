@@ -38,7 +38,7 @@ const ShipPackage = () => {
 
   const fetchServices = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/services');
+      const response = await fetch('http://localhost:8000/api/services');
       const data = await response.json();
       setServices(data.services);
     } catch (err) {
@@ -49,7 +49,7 @@ const ShipPackage = () => {
   const fetchCustomerProfile = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('http://localhost:5000/api/customer/profile', {
+      const response = await fetch('http://localhost:8000/api/customer/profile', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -89,7 +89,7 @@ const ShipPackage = () => {
     try {
       const token = localStorage.getItem('authToken');
       
-      const response = await fetch('http://localhost:5000/api/ship', {
+      const response = await fetch('http://localhost:8000/api/ship', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
