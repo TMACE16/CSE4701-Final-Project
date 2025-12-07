@@ -33,7 +33,7 @@ export default function NavBar() {
 	        <img src={logo} alt="Logo" className="logo-image" />
 	        <span className="site-title">PetAdopt</span>
         </Link>
-	<Link to="/pets" className="nav-link">Pets</Link>
+	<Link t0="/tracking" className="nav-button">Tracking</Link>
 	
 	{user?.role === "user" && <Link to="/my-applications" className="nav-link">My Applications</Link>}
 
@@ -53,7 +53,6 @@ export default function NavBar() {
           </div>
         ) : (
           <>
-			<Link t0="/tracking" className="nav-button">Tracking</Link>
             <Link to="/login" className="nav-button">Sign In</Link>
             <Link to="/register" className="nav-button">Register</Link>
           </>
