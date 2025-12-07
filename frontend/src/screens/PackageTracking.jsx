@@ -18,7 +18,7 @@ const PackageTracking = () => {
       // Get token from localStorage (you'd implement proper auth)
       const token = localStorage.getItem('authToken');
       
-      const response = await fetch('http://localhost:5000/api/user/packages', {
+      const response = await fetch('http://localhost:8000/api/user/packages', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -49,7 +49,7 @@ const PackageTracking = () => {
       // Get token from localStorage
       const token = localStorage.getItem('authToken');
       
-      const response = await fetch(`http://localhost:5000/api/tracking/${trackingNumber}`, {
+      const response = await fetch(`http://localhost:8000/api/tracking/${trackingNumber}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
