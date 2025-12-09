@@ -71,7 +71,7 @@ def login():
         return jsonify({
             "token": "fake-jwt-token",
             "user": {
-                "id": user["id"],
+                "id": user["user_id"],
                 "email": user["email"],
                 "role": user["role"]
             }
