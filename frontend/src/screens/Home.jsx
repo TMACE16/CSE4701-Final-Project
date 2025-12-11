@@ -67,9 +67,9 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-blue-600 to-blue-800 text-white overflow-hidden">
+      <div className="relative bg-gradient-to-r from-purple-700 to-purple-900 text-white overflow-hidden">
         <div className="absolute inset-0 bg-black opacity-10"></div>
         <div className="relative max-w-7xl mx-auto px-4 py-24 sm:py-32">
           <div className="text-center">
@@ -96,11 +96,11 @@ const Home = () => {
                     onChange={(e) => setTrackingNumber(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleQuickTrack(e)}
                     placeholder="Enter tracking number"
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800"
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-800"
                   />
                   <button
                     onClick={handleQuickTrack}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center gap-2"
+                    className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-medium transition-colors flex items-center gap-2"
                   >
                     Track <ArrowRight className="w-5 h-5" />
                   </button>
@@ -112,13 +112,13 @@ const Home = () => {
             <div className="flex flex-wrap justify-center gap-4">
               <button
                 onClick={() => navigate(isLoggedIn ? '/ship' : '/register')}
-                className="px-8 py-4 bg-white text-blue-600 rounded-lg hover:bg-blue-50 font-semibold text-lg transition-colors shadow-lg"
+                className="px-8 py-4 bg-white text-purple-700 rounded-lg hover:bg-gray-100 font-semibold text-lg transition-colors shadow-lg"
               >
                 {isLoggedIn ? 'Ship a Package' : 'Get Started'}
               </button>
               <button
                 onClick={() => navigate('/track')}
-                className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg hover:bg-white hover:text-blue-600 font-semibold text-lg transition-colors"
+                className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg hover:bg-white hover:text-purple-700 font-semibold text-lg transition-colors"
               >
                 View My Packages
               </button>
@@ -133,7 +133,7 @@ const Home = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="text-4xl font-bold text-blue-600 mb-2">{stat.number}</div>
+                <div className="text-4xl font-bold text-purple-700 mb-2">{stat.number}</div>
                 <div className="text-gray-600 font-medium">{stat.label}</div>
               </div>
             ))}
@@ -152,7 +152,7 @@ const Home = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
               <div key={index} className="bg-white rounded-lg shadow-md p-6 hover:shadow-xl transition-shadow">
-                <div className="p-3 bg-blue-50 rounded-lg inline-block mb-4 text-blue-600">
+                <div className="p-3 bg-purple-50 rounded-lg inline-block mb-4 text-purple-700">
                   {feature.icon}
                 </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-2">{feature.title}</h3>
@@ -177,7 +177,7 @@ const Home = () => {
                 <div className="text-center mb-6">
                   <h3 className="text-2xl font-bold text-gray-800 mb-2">{service.name}</h3>
                   <p className="text-gray-600 mb-4">{service.description}</p>
-                  <div className="text-3xl font-bold text-blue-600">{service.price}</div>
+                  <div className="text-3xl font-bold text-purple-700">{service.price}</div>
                 </div>
                 <div className="space-y-3">
                   {service.features.map((feature, idx) => (
@@ -189,7 +189,7 @@ const Home = () => {
                 </div>
                 <button
                   onClick={() => navigate(isLoggedIn ? '/ship' : '/register')}
-                  className="w-full mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+                  className="w-full mt-6 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-medium transition-colors"
                 >
                   Select Service
                 </button>
@@ -209,7 +209,7 @@ const Home = () => {
 
           <div className="grid md:grid-cols-3 gap-12">
             <div className="text-center">
-              <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+              <div className="w-16 h-16 bg-purple-700 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
                 1
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">Create Shipment</h3>
@@ -242,22 +242,22 @@ const Home = () => {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20 px-4">
+      <div className="bg-gradient-to-r from-purple-700 to-purple-900 text-white py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold mb-6">Ready to Ship?</h2>
-          <p className="text-xl mb-8 text-blue-100">
+          <p className="text-xl mb-8 text-purple-100">
             Join thousands of satisfied customers who trust us with their deliveries
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <button
               onClick={() => navigate('/register')}
-              className="px-8 py-4 bg-white text-blue-600 rounded-lg hover:bg-blue-50 font-semibold text-lg transition-colors shadow-lg"
+              className="px-8 py-4 bg-white text-purple-700 rounded-lg hover:bg-gray-100 font-semibold text-lg transition-colors shadow-lg"
             >
               Create Free Account
             </button>
             <button
               onClick={() => navigate('/login')}
-              className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg hover:bg-white hover:text-blue-600 font-semibold text-lg transition-colors"
+              className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg hover:bg-white hover:text-purple-700 font-semibold text-lg transition-colors"
             >
               Sign In
             </button>
@@ -271,7 +271,7 @@ const Home = () => {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Package className="w-8 h-8 text-blue-400" />
+                <Package className="w-8 h-8 text-purple-400" />
                 <span className="text-xl font-bold text-white">QuickShip</span>
               </div>
               <p className="text-sm">Fast, reliable package delivery services you can trust.</p>
