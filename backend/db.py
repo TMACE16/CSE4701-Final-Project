@@ -251,7 +251,6 @@ def init_db():
         ]
     )
     
-    # ✅ MOVED BEFORE conn.close()
     # First, get the user_id
     user_result = cursor.execute("""
         SELECT user_id FROM User WHERE email = ?
@@ -299,7 +298,6 @@ def init_db():
             "Package received at distribution center"
         ))
     
-    # ✅ NOW commit and close
     conn.commit()
     conn.close()
     print("Database initialized successfully!")
