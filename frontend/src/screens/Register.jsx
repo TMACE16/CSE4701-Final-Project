@@ -129,12 +129,14 @@ const Register = () => {
       });
 
       if (profileResponse.ok) {
-        // Success! Navigate to tracking page
-        navigate('/track');
+        // Success! Force page refresh and navigate
+        window.location.href = '/track';
       } else {
         // Profile creation failed, but account exists
         setError('Account created but profile setup failed. You can complete your profile later.');
-        setTimeout(() => navigate('/track'), 2000);
+        setTimeout(() => {
+          window.location.href = '/track';
+        }, 2000);
       }
 
     } catch (err) {
