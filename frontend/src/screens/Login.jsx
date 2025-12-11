@@ -59,12 +59,12 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center py-12 px-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
       <div className="max-w-md w-full">
         {/* Logo/Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-blue-600 rounded-full">
+            <div className="p-3 bg-purple-700 rounded-full">
               <Package className="w-10 h-10 text-white" />
             </div>
           </div>
@@ -96,7 +96,7 @@ const Login = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="you@example.com"
                 />
               </div>
@@ -125,7 +125,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium transition-colors"
+              className="w-full py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium transition-colors"
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
@@ -137,7 +137,7 @@ const Login = () => {
               Don't have an account?{' '}
               <button
                 onClick={() => navigate('/register')}
-                className="text-blue-600 hover:text-blue-800 font-medium"
+                className="text-purple-700 hover:text-purple-900 font-medium"
               >
                 Create one now
               </button>

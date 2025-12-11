@@ -145,12 +145,12 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12 px-4">
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Logo/Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-blue-600 rounded-full">
+            <div className="p-3 bg-purple-700 rounded-full">
               <Package className="w-10 h-10 text-white" />
             </div>
           </div>
@@ -163,16 +163,16 @@ const Register = () => {
           <div className="flex items-center justify-center">
             <div className="flex items-center">
               <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
-                step >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600'
+                step >= 1 ? 'bg-purple-700 text-white' : 'bg-gray-300 text-gray-600'
               }`}>
                 1
               </div>
               <span className="ml-2 text-sm font-medium text-gray-700">Account</span>
             </div>
-            <div className={`w-24 h-1 mx-4 ${step >= 2 ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+            <div className={`w-24 h-1 mx-4 ${step >= 2 ? 'bg-purple-700' : 'bg-gray-300'}`}></div>
             <div className="flex items-center">
               <div className={`flex items-center justify-center w-10 h-10 rounded-full ${
-                step >= 2 ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600'
+                step >= 2 ? 'bg-purple-700 text-white' : 'bg-gray-300 text-gray-600'
               }`}>
                 2
               </div>
@@ -209,7 +209,7 @@ const Register = () => {
                     value={accountData.email}
                     onChange={handleAccountChange}
                     required
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     placeholder="you@example.com"
                   />
                 </div>
@@ -258,7 +258,7 @@ const Register = () => {
 
               <button
                 type="submit"
-                className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+                className="w-full py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 font-medium transition-colors"
               >
                 Continue to Profile
               </button>
@@ -392,7 +392,7 @@ const Register = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium transition-colors"
+                  className="flex-1 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium transition-colors"
                 >
                   {loading ? 'Creating Account...' : 'Create Account'}
                 </button>
@@ -406,7 +406,7 @@ const Register = () => {
               Already have an account?{' '}
               <button
                 onClick={() => navigate('/login')}
-                className="text-blue-600 hover:text-blue-800 font-medium"
+                className="text-purple-700 hover:text-purple-900 font-medium"
               >
                 Sign in
               </button>
