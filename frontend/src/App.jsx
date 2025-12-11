@@ -19,7 +19,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-	<Route path="/admin-management" element={<AdminUserManagement />} />
+	<Route path="/admin/management" element={<AdminUserManagement />} />
 	<Route path="/admin" element={<AdminDashboard />} />
 		<Route path="/track" element={<PackageTracking />} />
         <Route path="/ship" element={<ShipPackage />} />
