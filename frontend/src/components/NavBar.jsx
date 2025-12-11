@@ -75,6 +75,7 @@ export default function NavBar() {
           <>
             <Link to="/admin" className="nav-link">Dashboard</Link>
             <Link to="/admin/users" className="nav-link">Manage Users</Link>
+            <Link to="/admin/customers" className="nav-link">Manage Customers</Link>
             <Link to="/track" className="nav-link">Track Package</Link>
           </>
         )}
