@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import NavBar from './components/NavBar';
 import Home from './screens/Home';
-import PackageTracking from './screens/PackageTracking';
 import ShipPackage from './screens/ShipPackage';
 import BillingPage from './screens/BillingPage';
 import AdminDashboard from './screens/AdminDashboard';
