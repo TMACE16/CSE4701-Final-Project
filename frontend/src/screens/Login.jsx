@@ -149,6 +149,7 @@ const Login = () => {
             <p className="text-xs font-semibold text-gray-700 mb-2">Demo Accounts:</p>
             <div className="text-xs text-gray-600 space-y-1">
               <p><strong>Customer:</strong> customer@example.com / password123</p>
+              <p><strong>Contract customer:</strong> contract@example.com / password123</p>
               <p><strong>Staff:</strong> staff@shipping.com / staff123</p>
               <p><strong>Admin:</strong> admin@shipping.com / admin123</p>
             </div>
