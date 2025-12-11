@@ -1,63 +1,116 @@
+/* Navigation Bar */
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #3B73FF;
-  padding: 10px 20px;
+  background-color: #4D148C; /* FedEx Purple */
+  padding: 15px 30px;
   color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Left Side - Logo and Links */
 .navbar-left {
   display: flex;
   align-items: center;
+  gap: 20px;
 }
 
 .nav-logo {
   display: flex;
   align-items: center;
-  margin-right: 15px;
   text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.nav-logo:hover {
+  opacity: 0.9;
 }
 
 .logo-image {
-  width: 40px;
-  height: 40px;
-  border-radius: 6px;
-  margin-right: 10px;
+  width: 45px;
+  height: 45px;
+  border-radius: 8px;
+  margin-right: 12px;
+  object-fit: cover;
 }
 
 .site-title {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: bold;
   color: white;
+  letter-spacing: 0.5px;
 }
 
 .nav-link {
-  margin-right: 15px;
   color: white;
   text-decoration: none;
-  font-weight: bold;
+  font-weight: 500;
+  font-size: 15px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
 }
 
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Right Side - User Info and Buttons */
 .navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.user-info {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.nav-button, .logout-button {
-  background-color: white;
-  color: #3B73FF;
-  border: none;
-  padding: 6px 12px;
-  cursor: pointer;
-  font-weight: bold;
-  border-radius: 4px;
-  text-decoration: none;
-}
-
 .user-email {
-  margin-right: 10px;
-  font-weight: bold;
+  font-weight: 500;
+  font-size: 14px;
+  color: white;
 }
 
+.user-role {
+  padding: 4px 10px;
+  background-color: #FF6200; /* FedEx Orange */
+  color: white;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.nav-button, .logout-button {
+  background-color: #FF6200; /* FedEx Orange */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.2s;
+  display: inline-block;
+}
+
+.nav-button:hover, .logout-button:hover {
+  background-color: #E55800; /* Darker orange on hover */
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255, 98, 0, 0.3);
+}
+
+.logout-button {
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid white;
+}
+
+.logout-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
