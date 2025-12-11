@@ -698,3 +698,140 @@ def update_user_role(user_id):
         return jsonify({'error': str(e)}), 500
     finally:
         conn.close()
+
+
+@admin_routes.route('/admin/customers', methods=['GET'])
+@staff_required
+def get_all_customers():
+    """
+    Get all customer accounts.
+    ---
+    responses:
+      200:
+        description: List of customers
+    """
+    conn = get_db_connection()
+    
+    try:
+        customers = conn.execute("""
+            SELECT 
+                c.customer_id,
+                c.user_id,
+                c.name,
+                c.phone,
+                c.has_contract,
+                c.account_number,
+                u.email,
+                u.role,
+                COUNT(p.package_id) as total_packages
+            FROM Customer c
+            LEFT JOIN User u ON c.user_id = u.user_id
+            LEFT JOIN Package p ON c.customer_id = p.customer_id
+            GROUP BY c.customer_id
+            ORDER BY c.customer_id DESC
+        """).fetchall()
+        
+        return jsonify({
+            'customers': [
+                {
+                    'customer_id': c['customer_id'],
+                    'user_id': c['user_id'],
+                    'name': c['name'],
+                    'email': c['email'],
+                    'phone': c['phone'],
+                    'has_contract': bool(c['has_contract']),
+                    'account_number': c['account_number'],
+                    'total_packages': c['total_packages']
+                }
+                for c in customers
+            ]
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+
+@admin_routes.route('/admin/customers/<int:customer_id>/contract', methods=['POST'])
+@admin_required
+def toggle_contract_status(customer_id):
+    """
+    Convert a customer to/from contract status.
+    ---
+    parameters:
+      - in: path
+        name: customer_id
+        required: true
+        schema:
+          type: integer
+      - in: body
+        name: contract_info
+        schema:
+          type: object
+          properties:
+            has_contract:
+              type: boolean
+    responses:
+      200:
+        description: Contract status updated
+    """
+    data = request.get_json()
+    conn = get_db_connection()
+    
+    try:
+        cursor = conn.cursor()
+        
+        # Get customer info
+        customer = conn.execute(
+            "SELECT * FROM Customer WHERE customer_id = ?",
+            (customer_id,)
+        ).fetchone()
+        
+        if not customer:
+            return jsonify({'error': 'Customer not found'}), 404
+        
+        if data.get('has_contract', False):
+            # Make them a contract customer
+            # Generate account number if they don't have one
+            if not customer['account_number']:
+                # Get highest account number and add 1
+                max_account = conn.execute(
+                    "SELECT MAX(account_number) as max_num FROM Customer"
+                ).fetchone()['max_num']
+                
+                account_number = (max_account or 1000) + 1
+            else:
+                account_number = customer['account_number']
+            
+            cursor.execute("""
+                UPDATE Customer
+                SET has_contract = 1, account_number = ?
+                WHERE customer_id = ?
+            """, (account_number, customer_id))
+            
+            message = f'Customer converted to contract account #{account_number}'
+        else:
+            # Remove contract status
+            cursor.execute("""
+                UPDATE Customer
+                SET has_contract = 0
+                WHERE customer_id = ?
+            """, (customer_id,))
+            
+            message = 'Contract status removed'
+        
+        conn.commit()
+        
+        return jsonify({
+            'message': message,
+            'customer_id': customer_id,
+            'has_contract': data.get('has_contract', False),
+            'account_number': account_number if data.get('has_contract') else None
+        }), 200
+        
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
