@@ -44,9 +44,9 @@ const Login = () => {
 
         // Navigate based on role
         if (data.user.role === 'admin' || data.user.role === 'staff') {
-          navigate('/admin');
+          window.location.href = '/admin';
         } else {
-          navigate('/track');
+          window.location.href = '/track';
         }
       } else {
         setError(data.error || 'Invalid email or password');

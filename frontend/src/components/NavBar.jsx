@@ -34,7 +34,7 @@ export default function NavBar() {
     localStorage.removeItem("userRole");
     localStorage.removeItem("userEmail");
     setUser(null);
-    navigate("/");
+    window.location.href = '/';
   };
 
   return (

@@ -1,5 +1,5 @@
 # Ignore SQLite database file
-petadoption.db
+shipping.db
 
 # Python cache
 __pycache__/
