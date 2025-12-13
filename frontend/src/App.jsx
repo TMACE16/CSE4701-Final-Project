@@ -23,7 +23,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
 	<Route path="/admin" element={<AdminDashboard />} />
   <Route path="/admin/users" element={<AdminUserManagement />} />
-  <Route path="/admin/customers" element={<AdminUserManagement />} />
+  <Route path="/admin/customers" element={<ManageCustomers />} />
 		<Route path="/track" element={<PackageTracking />} />
         <Route path="/ship" element={<ShipPackage />} />
         <Route path="/billing" element={<BillingPage />} />
