@@ -1,17 +1,4 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import NavBar from './components/NavBar';
-import Home from './screens/Home';
-import ShipPackage from './screens/ShipPackage';
-import BillingPage from './screens/BillingPage';
-import AdminDashboard from './screens/AdminDashboard';
-import AdminUserManagement from './screens/AdminUserManagement';
-import PackageTracking from './screens/PackageTracking';
-import ManageCustomers from './screens/ManageCustomers';
-import Register from './screens/Register';
-import Login from './screens/Login';
-
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import NavBar from './components/NavBar';
 import Home from './screens/Home';
